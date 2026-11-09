@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { formatDate, formatPrice, STATUS_LABEL } from "@/lib/format";
 
 type Order = {
-  id: string; number: string; status: string; email: string; fullName: string; phone: string;
+  id: string; number: string; status: string; deliveryMethod: string; email: string; fullName: string; phone: string;
   country: string; city: string; address: string; postalCode: string; comment: string;
   totalCents: number; currency: string; createdAt: string;
   items: { id: string; nameSnapshot: string; quantity: number; unitPriceCents: number }[];
@@ -54,7 +54,12 @@ export default function AdminOrders() {
         {orders?.map((o) => (
           <li key={o.id} className="hairline bg-bw-ink p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div><span className="font-mono">{o.number}</span> <span className="meta ml-2">{formatDate(o.createdAt)}</span></div>
+              <div>
+                <span className="font-mono">{o.number}</span> <span className="meta ml-2">{formatDate(o.createdAt)}</span>
+                <span className="meta ml-2 bg-bw-graphite px-2 py-1 text-bw-chrome">
+                  {o.deliveryMethod === "MEETING" ? "Встреча в Сумах" : "Доставка по Украине"}
+                </span>
+              </div>
               <label className="flex items-center gap-2">
                 <span className="meta">Статус</span>
                 <select className="field w-44" value={o.status} onChange={(e) => setStatus(o.id, e.target.value)} aria-label={`Статус заказа ${o.number}`}>
@@ -64,7 +69,7 @@ export default function AdminOrders() {
             </div>
             <div className="mt-3 grid gap-1 text-sm text-bw-chrome sm:grid-cols-2">
               <div>{o.fullName} · {o.email} · {o.phone}</div>
-              <div>{o.postalCode}, {o.country}, {o.city}, {o.address}</div>
+              <div>{o.deliveryMethod === "MEETING" ? "Личная встреча в Сумах (детали в Telegram)" : `${o.postalCode}, ${o.country}, ${o.city}, ${o.address}`}</div>
               {o.comment && <div className="text-bw-mute sm:col-span-2">«{o.comment}»</div>}
             </div>
             <ul className="mt-3 space-y-1 border-t border-bw-steel pt-3 text-sm">

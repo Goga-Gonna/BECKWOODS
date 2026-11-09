@@ -21,14 +21,11 @@ export const productInput = z.object({
 });
 export const productPatch = productInput.partial();
 
-export const orderInput = z.object({
+/** Общие поля заказа (для любого способа получения). */
+const orderBase = z.object({
   email: z.string().trim().toLowerCase().email().max(160),
   fullName: z.string().trim().min(2).max(120),
   phone: z.string().trim().regex(/^[+\d][\d\s()-]{6,20}$/, "Некорректный телефон"),
-  country: z.string().trim().min(2).max(80),
-  city: z.string().trim().min(2).max(80),
-  address: z.string().trim().min(4).max(200),
-  postalCode: z.string().trim().min(3).max(12),
   comment: z.string().trim().max(500).default(""),
   ageConfirmed: z.literal(true, { errorMap: () => ({ message: "Необходимо подтвердить совершеннолетие" }) }),
   items: z
@@ -36,6 +33,22 @@ export const orderInput = z.object({
     .min(1, "Корзина пуста")
     .max(50),
 });
+
+/** Доставка по Украине (1–2 дня): нужен адрес. */
+const deliveryOrder = orderBase.extend({
+  deliveryMethod: z.literal("DELIVERY"),
+  country: z.string().trim().min(2).max(80),
+  city: z.string().trim().min(2).max(80),
+  address: z.string().trim().min(4).max(200),
+  postalCode: z.string().trim().min(1, "Укажите индекс или номер отделения").max(20),
+});
+
+/** Встреча в Сумах: адрес не нужен, детали согласуются с менеджером в Telegram. */
+const meetingOrder = orderBase.extend({
+  deliveryMethod: z.literal("MEETING"),
+});
+
+export const orderInput = z.discriminatedUnion("deliveryMethod", [deliveryOrder, meetingOrder]);
 
 export const orderStatusInput = z.object({
   status: z.enum(["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]),

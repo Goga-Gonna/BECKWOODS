@@ -24,6 +24,12 @@ export const POST = route(async (req: Request) => {
   const qty = new Map<string, number>();
   for (const i of data.items) qty.set(i.productId, (qty.get(i.productId) ?? 0) + i.quantity);
 
+  // «Встреча в Сумах» не требует адреса — подставляем служебные значения
+  const ship =
+    data.deliveryMethod === "MEETING"
+      ? { country: "Украина", city: "Сумы", address: "Личная встреча", postalCode: "—" }
+      : { country: data.country, city: data.city, address: data.address, postalCode: data.postalCode };
+
   const order = await prisma.$transaction(async (tx) => {
     const products = await tx.product.findMany({
       where: { id: { in: Array.from(qty.keys()) }, active: true },
@@ -50,13 +56,11 @@ export const POST = route(async (req: Request) => {
     return tx.order.create({
       data: {
         number: orderNumber(),
+        deliveryMethod: data.deliveryMethod,
         email: data.email,
         fullName: data.fullName,
         phone: data.phone,
-        country: data.country,
-        city: data.city,
-        address: data.address,
-        postalCode: data.postalCode,
+        ...ship,
         comment: data.comment,
         ageConfirmed: true,
         totalCents: total,
@@ -67,7 +71,15 @@ export const POST = route(async (req: Request) => {
   });
 
   return NextResponse.json(
-    { order: { number: order.number, totalCents: order.totalCents, status: order.status }, demo: true },
+    {
+      order: {
+        number: order.number,
+        totalCents: order.totalCents,
+        status: order.status,
+        deliveryMethod: order.deliveryMethod,
+      },
+      demo: true,
+    },
     { status: 201 },
   );
 });

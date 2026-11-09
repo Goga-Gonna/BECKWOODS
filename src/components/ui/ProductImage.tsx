@@ -19,6 +19,11 @@ export function ProductImage({
   className?: string;
   priority?: boolean;
 }) {
+  if (src?.startsWith("/api/")) {
+    // Фото, загруженные через админку: уже сжаты в браузере и отдаются нашим API с долгим кэшем.
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={alt} loading={priority ? "eager" : "lazy"} decoding="async" className={clsx("absolute inset-0 h-full w-full object-cover", className)} />;
+  }
   if (src?.startsWith("/")) {
     return (
       <Image

@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 type Cat = { id: string; name: string };
 type Form = {
   slug: string; name: string; description: string; details: string;
-  price: string; stock: string; images: string; tags: string;
+  price: string; stock: string; images: string[]; tags: string;
   featured: boolean; active: boolean; categoryId: string;
 };
-const blank: Form = { slug: "", name: "", description: "", details: "", price: "", stock: "0", images: "", tags: "", featured: false, active: true, categoryId: "" };
+const blank: Form = { slug: "", name: "", description: "", details: "", price: "", stock: "0", images: [], tags: "", featured: false, active: true, categoryId: "" };
 
 export default function AdminProductForm({ params }: { params: { id: string } }) {
   const isNew = params.id === "new";
@@ -34,7 +35,7 @@ export default function AdminProductForm({ params }: { params: { id: string } })
         setF({
           slug: p.slug, name: p.name, description: p.description, details: p.details,
           price: (p.priceCents / 100).toString(), stock: String(p.stock),
-          images: p.images.join("\n"), tags: p.tags.join(", "),
+          images: p.images as string[], tags: p.tags.join(", "),
           featured: p.featured, active: p.active, categoryId: p.categoryId,
         });
       }
@@ -50,7 +51,7 @@ export default function AdminProductForm({ params }: { params: { id: string } })
     const body = {
       slug: f.slug.trim(), name: f.name, description: f.description, details: f.details,
       priceCents: Math.round(parseFloat(f.price) * 100), stock: parseInt(f.stock, 10),
-      images: f.images.split("\n").map((s) => s.trim()).filter(Boolean),
+      images: f.images,
       tags: f.tags.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
       featured: f.featured, active: f.active, categoryId: f.categoryId,
     };
@@ -85,7 +86,11 @@ export default function AdminProductForm({ params }: { params: { id: string } })
       </div>
       <label className="block"><span className="meta mb-1 block">Краткое описание</span><textarea className="field min-h-[72px] py-3" required value={f.description} onChange={up("description")} />{err("description")}</label>
       <label className="block"><span className="meta mb-1 block">Подробности</span><textarea className="field min-h-[110px] py-3" value={f.details} onChange={up("details")} /></label>
-      <label className="block"><span className="meta mb-1 block">Изображения (по одному на строку: /products/file.jpg или https://…)</span><textarea className="field min-h-[90px] py-3 font-mono text-sm" value={f.images} onChange={up("images")} />{err("images")}</label>
+      <div>
+        <span className="meta mb-2 block">Изображения</span>
+        <ImageUploader value={f.images} onChange={(images) => setF((x) => ({ ...x, images }))} />
+        {err("images")}
+      </div>
       <div className="flex flex-wrap gap-6">
         <label className="touch flex items-center gap-3"><input type="checkbox" checked={f.featured} onChange={up("featured")} className="h-5 w-5 accent-[#c9cdd2]" /> На главной (Featured)</label>
         <label className="touch flex items-center gap-3"><input type="checkbox" checked={f.active} onChange={up("active")} className="h-5 w-5 accent-[#c9cdd2]" /> Активен</label>

@@ -24,19 +24,24 @@ export const siteConfig = {
     telegram: {
       label: "Telegram",
       handle: "@beckwoods",
-      url: "https://t.me/BECKWOODSTORE", // ← замените на свой канал
+      url: "https://t.me/beckwoods", // ← замените на свой канал
     },
     instagram: {
       label: "Instagram",
       handle: "@beckwoods.store",
-      url: "https://www.instagram.com/beckwoods2026?exln=MW9qdjdlenVvZmVicA%3D%3D&utm_source=qr", // ← замените на свой аккаунт
+      url: "https://instagram.com/beckwoods.store", // ← замените на свой аккаунт
     },
   },
 
   contacts: {
     email: "hello@beckwoods.store",
-    telegramSupport: "https://t.me/menejment67",
+    telegramSupport: "https://t.me/beckwoods_support",
     hours: "Пн–Пт, 10:00–19:00",
+    /** Менеджер: сюда переходит покупатель, выбравший «Встреча в Сумах». */
+    manager: {
+      handle: "@menejment67",
+      url: "https://t.me/menejment67",
+    },
   },
 
   nav: [
